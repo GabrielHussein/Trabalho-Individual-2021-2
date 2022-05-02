@@ -12,4 +12,6 @@ COPY package.json yarn.lock ./
 
 COPY . .
 
+EXPOSE 3000
+
 CMD ["rails", "server", "-b", "0.0.0.0"]

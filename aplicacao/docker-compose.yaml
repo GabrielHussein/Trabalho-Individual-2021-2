@@ -4,15 +4,17 @@ services:
   postdb:
     container_name: postdb
     image: postgres:latest
-    volumes:
-      - dbvolume:/var/lib/postgresql/data
+    networks:
+      - biblioteca_digital
     ports: 
       - 5432:5432
     environment:
       POSTRES_USER: postgres
       POSTGRES_PASSWORD: postgres
   app:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
     command: bash -c "rm -f tmp/pids/server.pid && rails db:create db:migrate db:seed && bundle exec rails s -p 3000 -b '0.0.0.0'"
     volumes:
       - .:/app
@@ -20,5 +22,19 @@ services:
       - 3000:3000
     depends_on:
       - postdb
-volumes:
-  dbvolume: 
+    networks:
+      - biblioteca_digital
+  webserver:
+    container_name: webserver
+    image: nginx:latest
+    build: .
+    ports:
+      - 80:80
+    depends_on:
+      - app
+    volumes:
+      - "./nginx.conf:/etc/nginx/nginx.conf"
+
+networks:
+  biblioteca_digital:
+    driver: bridge
